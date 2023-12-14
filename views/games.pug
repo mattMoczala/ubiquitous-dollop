@@ -1,0 +1,78 @@
+extends layout
+
+block content
+  // Górny pasek z informacją o zalogowanym użytkowniku i opcją wylogowania
+  header.navbar.navbar-dark.bg-dark
+    .container
+      a.navbar-brand(href='#') Game Reviews
+      if username
+        p.navbar-text Logged in as #{username}
+        a.btn.btn-outline-danger.ml-2(href='/users/logout') Logout
+
+  // Pasek wyszukiwania
+  .container.mt-4
+    form.form-inline.my-2.my-lg-0(id='searchForm')
+      input.form-control.mr-sm-2(type='text', placeholder='Search by Title', name='search', id='searchInput')
+      button.btn.btn-outline-success.my-2.my-sm-0(type='button', onclick='searchGames()') Search
+
+  // Lista gier
+  .container.mt-4
+    each game in games
+      .card.mb-4
+        // Obrazek gry jako absolutny link
+        img.card-img-top(src=game.image_link, alt=`${game.title} Image`)
+
+        // Informacje o grze
+        .card-body
+          // Duży tytuł gry
+          h2.card-title #{game.title}
+
+          // Mniejszy opis gry
+          p.card-text #{game.description}
+
+          // Ocena użytkowników w postaci gwiazdek
+          .rating
+            each star in [1, 2, 3, 4, 5]
+              if star <= game.average_review
+                span.text-warning ★
+              else
+                span.text-secondary ☆
+
+          // Informacja o ilości ocen użytkowników
+          p.card-text Number of Reviews: #{game.review_amount}
+
+          // Warunek wyświetlania formularza do oceniania gry
+          if game.user_review
+            p Your review: #{game.user_review}
+          if !game.user_review
+            form(action='/review', method='post')
+              .form-group
+                label(for=`review-${game.title}`) Your Review:
+                input(name='gameId' style='display: none' value=`${game.id}`)
+                select.form-control(name='review', id=`review-${game.title}`)
+                  option(value='1') 1 star
+                  option(value='2') 2 stars
+                  option(value='3') 3 stars
+                  option(value='4') 4 stars
+                  option(value='5') 5 stars
+              button.btn.btn-primary(type='submit') Submit Review
+
+  script(src='https://code.jquery.com/jquery-3.3.1.slim.min.js')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js')
+  script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js')
+  script.
+    function searchGames() {
+      var input, filter, cards, card, title, i;
+      input = document.getElementById("searchInput");
+      filter = input.value.toUpperCase();
+      cards = document.querySelectorAll(".card");
+      for (i = 0; i < cards.length; i++) {
+        card = cards[i];
+        title = card.querySelector(".card-title");
+        if (title.innerText.toUpperCase().indexOf(filter) > -1) {
+          card.style.display = "";
+        } else {
+          card.style.display = "none";
+        }
+      }
+    }
