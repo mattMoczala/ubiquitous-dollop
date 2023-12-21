@@ -38,7 +38,7 @@ INSERT INTO users (login, passwd, displayName, role, created_at) VALUES
     ('admin_user', 'hashed_password3', 'Admin User', 'admin', '2023-01-03');
 
 -- Wstawianie przykładowych danych do tabeli reviews
-INSERT INTO reviews (reviewer_user_id, reviewed_game_id, review, created_at) VALUES
+INSERT INTO reviews (id, reviewer_user_id, reviewed_game_id, review, created_at) VALUES
     (1, 1, 1, 5, '2023-01-05'),
     (2, 2, 1, 4, '2023-01-06'),
     (3, 3, 2, 5, '2023-01-07');

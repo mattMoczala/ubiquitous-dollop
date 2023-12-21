@@ -42,7 +42,6 @@ router.get('/games', ensureAuthenticated, async function(req, res, next) {
       games.id, games.title, games.description, games.image_link, games.created_at
     ORDER BY
       games.created_at DESC;
-
   `;
 
   res.render('games', { username: 'Maciej Moczała', games });

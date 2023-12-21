@@ -27,15 +27,18 @@ passport.use('local-login', new LocalStrategy(async (username, password, done) =
   const user = await loginExists(username);
 
   if (!user) {
+    console.log(`${username} attempt to login failed, incorret username.`)
     return done(null, false, { message: 'Incorrect username.' });
   }
 
   const passesMatch = await matchPassword(password, user.passwd);
 
   if ( passesMatch ) {
+    console.log(`${username} logged in.`)
     return done(null, user);
   }
 
+  console.log(`${username} attempt to login failed, incorret password.`)
   return done(null, false, { message: 'Incorrect password.' });
 }));
 

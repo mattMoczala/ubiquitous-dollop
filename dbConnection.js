@@ -1,4 +1,5 @@
 const postgres = require('postgres')
+const fs = require('fs')
 
 // db connection
 const sql = postgres('', {
@@ -7,7 +8,10 @@ const sql = postgres('', {
     database             : 'postgres',                       // Name of database to connect to
     username             : 'maciejmoczala',                  // Username of database user
     password             : '',                               // Password of database user
-    ssl                  : 'require'
+    ssl: {
+      rejectUnauthorized: false,
+      ca: fs.readFileSync('/opt/homebrew/var/postgresql@14/server.crt').toString()
+    }
   });
 
 module.exports = sql;
