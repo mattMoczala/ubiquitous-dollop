@@ -12,7 +12,7 @@ const createUser = async (login, password, displayName, role) => {
   const client = new Client({
     host: 'localhost',
     port: 5432,
-    database: 'postgres',
+    database: 'games',
     user: 'maciejmoczala',
     password: '',
     sslmode: 'require',
@@ -27,7 +27,15 @@ const createUser = async (login, password, displayName, role) => {
   await client.query(`INSERT INTO users(login, passwd, role, displayName) VALUES ('${login}', '${hash}', '${role}', '${displayName}')`)
   // SAFE
   // await client.query(`INSERT INTO users(login, passwd, role, displayName) VALUES ($1::text, $2::text, $3::text, $4::text)`, [login, hash, role, displayName])
-
+  try {
+    await client.query(
+       'INSERT INTO "audit_log"  ("login", "event_type") VALUES($1, $2)',
+       [login, 'Registered user']
+    );
+    console.log('Pomyślnie dodano rekord do audit_log.');
+ } catch (error) {
+    console.error('Błąd podczas dodawania rekordu do audit_log:', error);
+ };
   console.log(`Registered user ${login}`)
 };
 

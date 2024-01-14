@@ -14,7 +14,7 @@ CREATE TABLE users (
     passwd TEXT,
     displayName TEXT,
     role TEXT,
-    created_at default CURRENT_DATE
+    created_at DATE default CURRENT_DATE
 );
 
 -- Tabela reviews
@@ -22,7 +22,16 @@ CREATE TABLE reviews (
     reviewer_user_id INTEGER REFERENCES users(id),
     reviewed_game_id INTEGER REFERENCES games(id),
     review INTEGER,
-    created_at default CURRENT_DATE
+    created_at DATE default CURRENT_DATE
+);
+
+-- Tabele audit_log
+CREATE TABLE audit_log (
+        id SERIAL,
+        login VARCHAR(255) NOT NULL,
+        event_type VARCHAR(50) NOT NULL,
+        event_date DATE default CURRENT_DATE,
+        PRIMARY KEY ("id")
 );
 
 -- Wstawianie przykładowych danych do tabeli games

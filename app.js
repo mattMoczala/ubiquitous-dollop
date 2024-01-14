@@ -8,6 +8,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 const bodyParser = require('body-parser');
 const { loginExists, matchPassword, getUserById } = require('./helpers');
+const pg = require('pg')
+const fs = require('fs')
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
@@ -26,8 +28,32 @@ passport.deserializeUser(async (id, done) => {
 passport.use('local-login', new LocalStrategy(async (username, password, done) => {
   const user = await loginExists(username);
 
+  const Client = pg.Client;
+  const client = new Client({
+    host: 'localhost',
+    port: 5432,
+    database: 'games',
+    user: 'maciejmoczala',
+    password: '',
+    sslmode: 'require',
+    ssl: {
+      rejectUnauthorized: false,
+      ca: fs.readFileSync('/opt/homebrew/var/postgresql@14/server.crt').toString()
+    }
+  })
+  await client.connect()
+
   if (!user) {
     console.log(`${username} attempt to login failed, incorret username.`)
+    try {
+      await client.query(
+         'INSERT INTO "audit_log"  ("login", "event_type") VALUES($1, $2)',
+         [username, 'Incorrect username']
+      );
+      console.log('Pomyślnie dodano rekord do audit_log.');
+   } catch (error) {
+      console.error('Błąd podczas dodawania rekordu do audit_log:', error);
+   };
     return done(null, false, { message: 'Incorrect username.' });
   }
 
@@ -35,9 +61,21 @@ passport.use('local-login', new LocalStrategy(async (username, password, done) =
 
   if ( passesMatch ) {
     console.log(`${username} logged in.`)
+    await client.query(
+      'INSERT INTO "audit_log"  ("login", "event_type") VALUES($1, $2)',
+      [username, 'Logged in.']
+   );
     return done(null, user);
   }
-
+  try {
+    await client.query(
+       'INSERT INTO "audit_log"  ("login", "event_type") VALUES($1, $2)',
+       [username, 'Incorrect password']
+    );
+    console.log('Pomyślnie dodano rekord do audit_log.');
+ } catch (error) {
+    console.error('Błąd podczas dodawania rekordu do audit_log:', error);
+ };
   console.log(`${username} attempt to login failed, incorret password.`)
   return done(null, false, { message: 'Incorrect password.' });
 }));
